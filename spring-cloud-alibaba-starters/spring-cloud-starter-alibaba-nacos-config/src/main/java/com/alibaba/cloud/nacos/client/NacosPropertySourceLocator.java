@@ -74,39 +74,32 @@ public class NacosPropertySourceLocator implements PropertySourceLocator {
 
 	@Override
 	public PropertySource<?> locate(Environment env) {
-		//设置环境
 		nacosConfigProperties.setEnvironment(env);
-		//获取配置服务
 		ConfigService configService = nacosConfigManager.getConfigService();
 
 		if (null == configService) {
 			log.warn("no instance of config service found, can't load config from nacos");
 			return null;
 		}
-		//超时30秒
 		long timeout = nacosConfigProperties.getTimeout();
-		//属性源建造器
 		nacosPropertySourceBuilder = new NacosPropertySourceBuilder(configService,
 				timeout);
-		//dataid的名字
 		String name = nacosConfigProperties.getName();
-		//前缀
+
 		String dataIdPrefix = nacosConfigProperties.getPrefix();
 		if (StringUtils.isEmpty(dataIdPrefix)) {
 			dataIdPrefix = name;
 		}
-		//前缀为空的话默认就是spring.application.name
+
 		if (StringUtils.isEmpty(dataIdPrefix)) {
 			dataIdPrefix = env.getProperty("spring.application.name");
 		}
-		//创建符合属性源
+
 		CompositePropertySource composite = new CompositePropertySource(
 				NACOS_PROPERTY_SOURCE_NAME);
-		//加载共享的配置
+
 		loadSharedConfiguration(composite);
-		//加载扩展的配置
 		loadExtConfiguration(composite);
-		//加载应用本身的配置
 		loadApplicationConfiguration(composite, dataIdPrefix, nacosConfigProperties, env);
 		return composite;
 	}
